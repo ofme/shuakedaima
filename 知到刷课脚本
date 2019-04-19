@@ -1,0 +1,115 @@
+
+var fa = $("body");
+var btn = $("<li></li>");
+var json = {
+    "background": "#31e16d",
+    "height": "16px",
+    "padding": "5px",
+    "z-index": 99999,
+    "cursor": "pointer",
+    "top": "300px",
+    "right": "120px",
+    "position": "fixed"
+};
+btn.css(json);
+btn.html("<span id='lfsenior'>开启自动播放模式</span>");
+fa.append(btn);
+btn.isPlay=false;
+btn.isNewOpend=true;
+var timer;
+
+btn.click(function () {
+        btn.isPlay=!btn.isPlay;
+        if (btn.isPlay) { //定时器开启
+                btn.isNewOpend=true;
+                btn.css("background","#31e16d");
+                $("#lfsenior").html("已开启!");
+            timer=setInterval(start, 1000);
+        }else{  //定时器关闭
+                clearInterval(timer);
+                $("iframe").contents().find("iframe").contents().find("#video > div.vjs-control-bar > button")[0].click();
+                btn.css("background","red");
+                $("#lfsenior").html("已关闭!");
+        }
+});
+
+//播放函数
+function play(video) {
+        video.find("#video > button").click();
+    var jy = video.find("#video > div.vjs-control-bar > div.vjs-volume-panel.vjs-control.vjs-volume-panel-vertical > button");
+    if (jy.attr("title") != "取消静音") {
+        jy.click()
+    }
+}
+
+//下一章
+function next_play() {
+        //获取右边未完成的章节列表  表现为orange橙色
+    var lists=document.getElementsByClassName('roundpointStudent  orange01 a002');
+    //可能刷着刷着当前章节变绿了,先标记一下
+    var flag=true;
+    for(var i=0;i<lists.length-1;i++){//遍历,获取当前选中的元素,也有可能没有选中上面的列表
+            var par=lists[i].parentNode;
+            if (par.className=="currents") {
+                    lists[i+1].parentNode.click();
+                    flag=false;
+                    break;
+            }
+    }
+    if (flag==true) {
+            lists[0].parentNode.click();
+    }
+}
+
+function start() {
+
+        //当前是否打开了视频页
+        var dct=$(".currents")[0];
+        if (dct.title!="视频"&&btn.isNewOpend==true) {
+            var tabtags=document.getElementsByClassName('tabtags')[0].children;
+            for(var i=0;i<tabtags.length;i++){
+                if (tabtags[i].title=="视频") {
+                    tabtags[i].click();
+                    break;
+                }
+            }
+        }
+
+        //获取iframe
+        var video = $("iframe").contents().find("iframe").contents();
+        
+        //如果正在加载
+        var load = video.find("#loading");
+        if (load.css("visibility") != "hidden") {
+            return;
+        }
+        //获取当前进度
+        var spans = video.find("#video > div.vjs-control-bar > div.vjs-progress-control.vjs-control > div").attr("aria-valuenow");
+        var pesen = parseInt(spans);
+        //获取任务点标记
+        //其实就一张图片,通过图片的位置来判断是否完成,大概视频进度在84%左右就会判断任务完成
+        //图片地址:https://mooc1-1.chaoxing.com/ananas/css/job-status.png
+        //未完成:0% 0%; 完成:0px -24px;但是不能根据这个来进行判断是否下一章,网站会检测出异常,这里用于避免重复刷课.
+        var targe=$("iframe").contents().find("#ext-gen1040")[0];
+        var positions=getComputedStyle(targe,null)['backgroundPosition'];
+        
+        //新打开的章节,视频任务已完成,自动下一章
+        if (positions=="0px -24px"&&btn.isNewOpend==true) {
+            btn.isNewOpend=true;
+            next_play();
+        
+        //当前视频还没有完成
+        }else if (pesen<95) {
+                play(video);
+                btn.isNewOpend=false;
+        //当前进度达到92%,自动下一章,这里也可以改小一点只要不异常就可以
+        }else if (pesen>=92) {
+                btn.isNewOpend=true;
+                next_play();
+        }else{
+                clearInterval(timer);
+        }
+
+        $("#lfsenior").html("自动模式已开启,本章进度:" + spans + "%");
+}
+复制代码
