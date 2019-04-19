@@ -1,0 +1,91 @@
+
+//查找节点
+var tips = document.getElementsByClassName("exploreTip");
+//创建新节点
+var option = document.createElement("div");
+//添加样式
+option.style="color:DarkOrange;text-align:center;line-height:90px;font-size:30px;background-image: url('https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1555229569058&di=b96c64bb8d02130a76cab9525cdd1610&imgtype=0&src=http%3A%2F%2Fimg.lenovomm.com%2Fs3%2Fimg%2Ficon%2Fapp%2Fapp-img-lestore%2F2315-2015-07-07040431-1436256271865.png'); background-repeat: no-repeat; background-size: 100%; width: 90px; height: 90px; border-radius: 45px;position:fixed;left:60px;top:200px; z-index:999;"
+//添加点击事件
+option.setAttribute("onClick","StartOrStop()");
+option.setAttribute("id","rains");
+//插入节点到页面
+tips[0].parentNode.insertBefore(option,tips[0]);
+//定时器
+var timer;
+//初始状态
+var startstatus = 0;
+//次数
+var number = 0;
+
+//函数
+function start(){
+    if(number % 200 == 0){
+          console.clear();
+    }
+    number += 1;
+    //获取进度条,以右边章节列表里的进度为准
+    var pass = document.getElementsByClassName("progressbar")[0];//passTime
+    //获取答题框状态
+    var dialog = document.getElementsByClassName("wrap_popboxes  wrap_popchapter")[0];
+    var vbox=document.getElementsByClassName('volumeBox')[0];
+    //静音
+    if(vbox.className=="volumeBox"){
+           document.getElementsByClassName("volumeIcon")[0].click();
+    }
+    //获取1.5倍速播放按钮
+    var SpeedBox15=document.getElementsByClassName("speedTab15")[0];
+    var SpeedBox=document.getElementsByClassName("speedBox")[0];
+    //判断当前是否为1.5倍速,根据图片来判断
+    if(SpeedBox.style.backgroundImage!='url("http://lc.zhihuishu.com/ableVideoPlayer/img/core/1.5-2.png")')
+    {
+           SpeedBox15.click();
+    }
+    //通过删除节点来关闭答题框
+    if(dialog != undefined){
+        var body=document.getElementsByTagName('body')[0];
+       var a=document.getElementById('popbox_overlay');
+       body.removeChild(a);
+       body.removeChild(dialog);
+    }
+    //判断播放进度是否大于84%
+    if(parseInt(pass.style.width) > 84){
+        //切换下一个视频
+        document.getElementById("nextBtn").click();
+    }
+    var play  = document.getElementsByClassName("bigPlayButton pointer")[0];
+    //已经暂停 点击开始按钮 
+    if(play.style.display == "block"){
+            play.click();
+    }
+    console.log("执行第"+ number + "次");
+}
+function StartOrStop(){
+    //获取播放状态
+    var play  = document.getElementsByClassName("bigPlayButton pointer")[0];
+    if (startstatus == 0){
+        //开始脚本
+        timer = setInterval(start, 3000);
+        //已经暂停 点击开始按钮 
+        if(play.style.display == "block"){
+            play.click();
+        }
+        startstatus = 1;
+        var rains = document.getElementById("rains");
+        rains.innerText = "已开";
+        rains.style.color = "blue";
+    }else if (startstatus == 1) {
+//停止脚本
+        clearInterval(timer);
+        //已经播放 暂停播放
+        if(play.style.display == "none"){
+            play.click();
+        }
+        startstatus = 0;
+        var rains = document.getElementById("rains");
+        rains.innerText = "已关";
+        rains.style.color = "red";
+    }
+}
+
+复制代码
+在浏览器内->F12->找到控制台(console)->复制代码到输入框内->回车->关闭开发者工具->在页面找到被创造的图标->盘它
